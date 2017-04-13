@@ -175,12 +175,12 @@ struct entPlayer : entPhysicsObject
 				onGround = 1;
 			}
 		}
-		
+
 
 
 		// player movement inputs ///
-		float energyFactor = 0.0015;
-		float appliedEnergy = globals->timeDelta * energyFactor;
+		float energyFactor = 0.000367;
+
 		if (onGround)
 		{
 			if (input->keyboard->keyDown(VK_SPACE))
@@ -188,24 +188,36 @@ struct entPlayer : entPhysicsObject
 				pos.y += jumpYOffset;
 				acc.y += 0.008;
 			}
-			if (input->keyboard->keyDown('W'))
-			{
-				//pos = pos + (camera->normalizedLookDir * HUtils::XYZ(1,0,1)).normalized() * HUtils::XYZ(speedMultiplier, 0, speedMultiplier);
-				acc += (camera->normalizedLookDir * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(appliedEnergy, 0, appliedEnergy);
-			}
-			if (input->keyboard->keyDown('S'))
-			{
-				acc += (camera->normalizedLookDir * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(-appliedEnergy, 0, -appliedEnergy);
-			}
-			if (input->keyboard->keyDown('A'))
-			{
-				//pos = pos + yRotate(camera->normalizedLookDir, 270) * HUtils::XYZ(speedMultiplier, speedMultiplier, speedMultiplier);
-				acc += (yRotate(camera->normalizedLookDir, 270) * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(appliedEnergy, 0, appliedEnergy);
-			}
-			if (input->keyboard->keyDown('D'))
-			{
-				acc += (yRotate(camera->normalizedLookDir, 90) * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(appliedEnergy, 0, appliedEnergy);
-			}
+		}
+		else
+		{
+			energyFactor *= 0.12;
+		}
+
+		float appliedEnergy = globals->timeDelta * energyFactor;
+		int wasPressed = 0;
+
+		if (input->keyboard->keyDown('W'))
+		{
+			//pos = pos + (camera->normalizedLookDir * HUtils::XYZ(1,0,1)).normalized() * HUtils::XYZ(speedMultiplier, 0, speedMultiplier);
+			acc += (camera->normalizedLookDir * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(appliedEnergy, 0, appliedEnergy);
+			wasPressed = 1;
+		}
+		if (input->keyboard->keyDown('S'))
+		{
+			acc += (camera->normalizedLookDir * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(-appliedEnergy, 0, -appliedEnergy);
+			wasPressed = 1;
+		}
+		if (input->keyboard->keyDown('A'))
+		{
+			//pos = pos + yRotate(camera->normalizedLookDir, 270) * HUtils::XYZ(speedMultiplier, speedMultiplier, speedMultiplier);
+			acc += (yRotate(camera->normalizedLookDir, 270) * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(appliedEnergy, 0, appliedEnergy);
+			wasPressed = 1;
+		}
+		if (input->keyboard->keyDown('D'))
+		{
+			acc += (yRotate(camera->normalizedLookDir, 90) * HUtils::XYZ(1, 0, 1)).normalized() * HUtils::XYZ(appliedEnergy, 0, appliedEnergy);
+			wasPressed = 1;
 		}
 
 		// other key inputs //
@@ -217,8 +229,8 @@ struct entPlayer : entPhysicsObject
 		// new bouncy ball
 		if (input->keyboard->keyDownEvent('F'))
 		{
-			for(int i = 0; i < 1; i++)
-				entityManager->addEntity(new entBounceyBall(HUtils::XYZ(0,0,0), HUtils::randVec()*0.1));
+			for (int i = 0; i < 1; i++)
+				entityManager->addEntity(new entBounceyBall(HUtils::XYZ(0, 0, 0), HUtils::randVec()*0.1));
 		}
 		// print all entities
 		if (input->keyboard->keyDownEvent('G'))
@@ -238,7 +250,7 @@ struct entPlayer : entPhysicsObject
 		// lmao jet pack
 		if (input->keyboard->keyDown(VK_LBUTTON))
 		{
-			vel += camera->normalizedLookDir.normalized() * -0.00004;	
+			vel += camera->normalizedLookDir.normalized() * -0.00004;
 		}
 		// crouch
 		if (input->keyboard->keyDown(VK_CONTROL)) //crouched
@@ -251,23 +263,21 @@ struct entPlayer : entPhysicsObject
 			crouched = 0;
 			targetPlayerHeight = 1.4;
 		}
-		
+
 
 
 		// wall collision //
-		float wallDistOffset = 0.1f;
 		trace wall = collider->findCollision(
-			pos + HUtils::XYZ(0, 0.1f, 0),
+			pos + HUtils::XYZ(0, 0.1, 0),
 			vel.normalized(),
 			dynamic_cast<entWorld*>(entityInterop->getWorld())->mesh);
-		if (wall.didHit && !wall.traceFailed && wall.distance < wallDistOffset)
+
+		if (wall.didHit && !wall.traceFailed && wall.distance < 0.5)
 		{
-			HUtils::XYZ u(vel.x, 0, vel.y);
-			HUtils::XYZ v(-wall.hitNormal.z, 0, wall.hitNormal.x);
-			float vm = v.magnitude();
-			float t = (u.x * v.x + u.z * v.z) / (vm*vm);
-			vel = v * t;
-			pos += wall.hitNormal * wallDistOffset;
+			HUtils::XYZ hozVel = HUtils::XYZ(vel.x, 0, vel.z);
+			vel.x += wall.hitNormal.x * hozVel.magnitude();
+			vel.y += wall.hitNormal.y * hozVel.magnitude();
+			vel.z += wall.hitNormal.z * hozVel.magnitude();
 		}
 
 
@@ -278,8 +288,8 @@ struct entPlayer : entPhysicsObject
 
 		float vertFriction = 1.0001;
 		float horiFriction = 1.0001;
-		float groundFriction = 1.02;
-		
+		float groundFriction = 1.0054;
+
 		if (onGround)
 			horiFriction = groundFriction;
 		vel.x /= horiFriction;
@@ -288,16 +298,18 @@ struct entPlayer : entPhysicsObject
 
 
 		// new velocity cap //
-		float maxHoriSpeed = 0.014;
-		HUtils::XYZ horiVel(vel.x, 0, vel.z);
-		float currentSpeed = horiVel.magnitude();
-		if (currentSpeed > maxHoriSpeed)
+		if(onGround)
 		{
-			horiVel = horiVel.normalized() * maxHoriSpeed;
-			vel.x = horiVel.x;
-			vel.z = horiVel.z;
+			float maxHoriSpeed = 0.005;
+			HUtils::XYZ horiVel(vel.x, 0, vel.z);
+			float currentSpeed = horiVel.magnitude();
+			if (currentSpeed > maxHoriSpeed)
+			{
+				horiVel = horiVel.normalized() * maxHoriSpeed;
+				vel.x = horiVel.x;
+				vel.z = horiVel.z;
+			}
 		}
-
 		cout << vel.magnitude() << endl;
 
 		pos += vel;
@@ -327,5 +339,6 @@ struct entPlayer : entPhysicsObject
 	float targetPlayerHeight = 1;
 	bool onGround = 0;
 	bool crouched = 0;
+	float gainSpeed = 0;
 	HUtils::XYZ acc;
 };
