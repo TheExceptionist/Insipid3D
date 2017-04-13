@@ -41,7 +41,7 @@ struct CEngine
 		renderer->detatch();
 		input->init();
 		dynamic_cast<entWorld*>(entityManager->addEntity(new entWorld(new CModel("models\\crossfire\\crossfire.obj", HUtils::XYZ(0, 0, 0), "models\\crossfire\\", 1))))->mesh->mapColorize();
-		entityManager->addEntity(new entPlayer(HUtils::XYZ(-1,0.2,-1)));
+		entityManager->addEntity(new entPlayer(HUtils::XYZ(0,0.2,10)));
 		entityManager->addEntity(new entEnviroment(0.7, 0.7, 0.95, 0.01f));
 		entityManager->addEntity(new entMine(HUtils::XYZ(2, 4, 16)));
 		entityManager->addEntity(new entMine(HUtils::XYZ(-20, 5, 6)));

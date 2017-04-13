@@ -15,6 +15,6 @@ void CEngineGlobals::init()
 	cVX = 0;
 	cVY = 0;
 	cVZ = 0;
-	gravity = 0.00012;
+	gravity = 0.0002;
 	tickTime = 8000;
 }

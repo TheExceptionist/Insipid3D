@@ -22,7 +22,7 @@ struct CCameraController
 	}
 	void update(HUtils::XYZ pos_, HUtils::XYZ vel)
 	{
-		sensitivity = 0.2;
+		sensitivity = 0.1;
 		//unfreeze mouse
 		
 		oldMouseX = mouseX;
