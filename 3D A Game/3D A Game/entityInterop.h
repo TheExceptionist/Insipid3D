@@ -8,6 +8,7 @@
 #include "model.h"
 #include "collider.h"
 #include "entityWorld.h"
+
 struct CEntityList
 {
 	std::vector<CEntity*> entities;

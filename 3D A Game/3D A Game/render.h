@@ -53,6 +53,11 @@ struct CRenderer
 		
 		entityManager->render();
 
+		glBegin(GL_LINES);
+		glVertex3f(cameraPos.x, cameraPos.y-0.5, cameraPos.z);
+		glVertex3f(cameraPos.x + camera->wishDirection.x, (cameraPos.y - 0.5) + camera->wishDirection.y, cameraPos.z + camera->wishDirection.z);
+		glEnd();
+
 		reshape(globals->windowWidth, globals->windowHeight);
 		glutSwapBuffers();
 		glutPostRedisplay();
